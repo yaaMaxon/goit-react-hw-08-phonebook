@@ -1,5 +1,5 @@
 import { fetchAddContact, fetchContacts, fetchDeleteContact } from "services/api";
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, isAnyOf } from "@reduxjs/toolkit";
 
 export const requestContacts = createAsyncThunk(
   "contacts/fetchAll",
@@ -31,7 +31,6 @@ export const deleteContact = createAsyncThunk(
     try {
       const contact = await fetchDeleteContact(contactId);
       
-      console.log(contact)
       return contact;
     } catch (error) {
       return thunkAPI.rejectWithValue(error.message);
@@ -59,43 +58,37 @@ const contactsSlice = createSlice({
     },
   },
 
-  extraReducers: builder =>
-    builder.addCase(requestContacts.pending, (state, action) => {
-      state.contacts.isLoading = true;
-      state.contacts.error = null;
-    })
+  extraReducers: builder => builder
     .addCase(requestContacts.fulfilled, (state, action) => {
       state.contacts.isLoading = false;
       state.contacts.items = action.payload;
     })
-    .addCase(requestContacts.rejected, (state, action) => {
-      state.contacts.isLoading = false;
-      state.contacts.error = action.payload;
-    })
 
-    .addCase(addContact.pending, (state, action) => {
-      state.contacts.isLoading = true;
-      state.contacts.error = null;
-    })
     .addCase(addContact.fulfilled, (state, action) => {
       state.contacts.isLoading = false;
       state.contacts.items.push(action.payload);
     })
-    .addCase(addContact.rejected, (state, action) => {
-      state.contacts.isLoading = false;
-      state.contacts.error = action.payload;
-    })
 
-    .addCase(deleteContact.pending, (state, action) => {
-      state.contacts.isLoading = true;
-      state.contacts.error = null;
-    })
     .addCase(deleteContact.fulfilled, (state, action) => {
       state.contacts.isLoading = false;
       state.contacts.items = state.contacts.items.filter(
         contact => contact.name !== action.payload.name);
     })
-    .addCase(deleteContact.rejected, (state, action) => {
+
+    .addMatcher(
+     isAnyOf(
+      requestContacts.pending, 
+      addContact.pending, 
+      deleteContact.pending), 
+    state => {
+      state.contacts.isLoading = true;
+      state.contacts.error = null;
+    })
+    .addMatcher(
+     isAnyOf(
+      requestContacts.rejected, 
+      addContact.rejected, 
+      deleteContact.rejected), (state, action) => {
       state.contacts.isLoading = false;
       state.contacts.error = action.payload;
     })

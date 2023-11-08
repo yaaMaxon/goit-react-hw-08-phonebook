@@ -1,0 +1,26 @@
+.header_link {
+  color: black;
+  border: 1px solid black;
+  border-radius: 10px;
+  display: inline-block;
+  padding: 20px;
+  margin-right: 15px;
+  font-size: 16px;
+  text-decoration: none;
+  transition: all 0.3s;
+}
+
+.header_link.active {
+  color: red;
+}
+
+.navigation {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.header {
+  padding-top: 20px;
+  padding-bottom: 40px;
+}
